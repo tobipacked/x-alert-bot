@@ -64,6 +64,12 @@ def run_check():
             page.wait_for_selector('article[data-testid="tweet"]', timeout=15000)
         except Exception as e:
             print(f"[WARNING] Could not load results this run: {e}")
+            try:
+                page.screenshot(path="debug_screenshot.png")
+                print(f"[DEBUG] Page title was: {page.title()}")
+                print(f"[DEBUG] Current URL was: {page.url}")
+            except Exception as debug_e:
+                print(f"[DEBUG] Could not capture debug info: {debug_e}")
             browser.close()
             return
 
