@@ -50,12 +50,29 @@ def run_check():
     new_ids = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            user_agent=(
+        browser = p.chromium.launch(
+            headless=True,
+            args=[
+                "--disable-blink-features=AutomationControlled",
+                "--disable-dev-shm-usage",
+                "--no-sandbox",
+            ],
+        )
+        context_kwargs = {
+            "user_agent": (
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                 "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-            )
+            ),
+            "viewport": {"width": 1280, "height": 800},
+            "locale": "en-US",
+        }
+        if os.path.exists("storage_state.json"):
+            context_kwargs["storage_state"] = "storage_state.json"
+        else:
+            print("[WARNING] No storage_state.json found — running logged out.")
+        context = browser.new_context(**context_kwargs)
+        context.add_init_script(
+            "Object.defineProperty(navigator, 'webdriver', {get: () => undefined})"
         )
         page = context.new_page()
 
