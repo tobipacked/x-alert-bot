@@ -23,7 +23,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Install Playwright browsers and dependencies
-        run: python -m playwright install --with-deps chromium
+        run: sudo python -m playwright install --with-deps chromium
 
       - name: Run script
         env:
