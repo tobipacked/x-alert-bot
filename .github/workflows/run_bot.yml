@@ -29,6 +29,11 @@ jobs:
       - name: Install Playwright browsers + OS deps
         run: python -m playwright install --with-deps chromium
 
+      # --- NEW STEP ADDED HERE ---
+      - name: Restore login session
+        run: |
+          echo "${{ secrets.X_STORAGE_STATE }}" > storage_state.json
+
       - name: Run bot
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
