@@ -3,13 +3,13 @@ name: Run Playwright Bot
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/2 * * * *'   # every 2 min — balance of freshness vs. reliability
+    - cron: '*/2 * * * *'
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed so the job can push seen_ids.json back
+      contents: write
 
     steps:
       - name: Checkout repo
@@ -26,4 +26,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Install
+      - name: Install Playwright browsers + OS deps
+        run: python -m playwright install --with-deps chromium
+
+      - name: Run bot
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python bot.py
+
+      - name: Commit updated seen_ids.json
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git add seen_ids.json
+          git diff --staged --quiet && echo "No changes to commit" || git commit -m "Update seen tweet IDs [skip ci]"
+          git push
